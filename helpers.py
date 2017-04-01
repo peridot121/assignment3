@@ -11,8 +11,9 @@ from sklearn.metrics import accuracy_score as acc
 from sklearn.mixture import GaussianMixture as GMM
 from sklearn.metrics.pairwise import pairwise_distances
 from sklearn.feature_selection import mutual_info_classif as MIC
-from sklearn.utils.estimator_checks import check_estimator
 from sklearn.base import TransformerMixin,BaseEstimator
+import scipy.sparse as sps
+from scipy.linalg import pinv
 
 random_state = 12345
 nn_arch = [(5,2),(5,),(2,),(10,5), (10,)]
@@ -48,6 +49,17 @@ def aveMI(X,Y):
     MI = MIC(X,Y) 
     return np.nanmean(MI)
 
+  
+def reconstructionError(projections,X):
+    W = projections.components_
+    if sps.issparse(W):
+        W = W.todense()
+    p = pinv(W)
+    # reconstructed = ((p@W)@(X.T)).T # Unproject projected data
+    reconstructed = np.dot(np.dot(p,W), X.T).T
+    errors = np.square(X-reconstructed) # TODO: mean over rows, and then summed down the column, and maybe sqrted
+    return np.nanmean(errors)
+    
 
 # http://datascience.stackexchange.com/questions/6683/feature-selection-using-feature-importances-in-random-forests-with-scikit-learn        
 

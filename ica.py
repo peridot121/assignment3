@@ -1,3 +1,4 @@
+# Adapted/copied from Jonathan Tay's code.
 import os
 import sys
 import traceback
@@ -42,18 +43,25 @@ def run_ica(training_data, testing_data, name):
         trainX = scaler.transform(trainX)
         testX = scaler.transform(testX)
 
-        network_shape = list(nn_arch)
-        network_shape.append((training_data.shape[1] / 2,))
+        # network_shape = list(nn_arch)
+        # network_shape.append((training_data.shape[1] / 2,))
+        network_shape = list((training_data.shape[1] / 2,))
 
         # Data for step 1.
+        dims = range(2, trainX.shape[1] + 1)
         ica = FastICA(random_state=random_state)
-        tmp = ica.fit_transform(trainX)
-        tmp = pd.DataFrame(tmp)
-        tmp = tmp.kurt(axis=0) + 3
-        tmp.to_csv(out + 'scree.csv')
+        kurt = {}
+        for dim in dims:
+            ica.set_params(n_components=dim)
+            tmp = ica.fit_transform(trainX)
+            tmp = pd.DataFrame(tmp)
+            tmp = tmp.kurt(axis=0)
+            kurt[dim] = tmp.abs().mean()
+
+        kurt = pd.Series(kurt)
+        kurt.to_csv(out + 'scree.csv')
 
         # Data for step 2.
-        dims = range(2, trainX.shape[1] + 1)
         grid = {'ica__n_components': dims, 'NN__alpha': nn_reg, 'NN__hidden_layer_sizes': network_shape}
         ica = FastICA(random_state=random_state)
         mlp = MLPClassifier(activation='relu', max_iter=2000, early_stopping=True, random_state=random_state)

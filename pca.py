@@ -20,7 +20,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.decomposition import PCA
 
 def run_pca(training_data, testing_data, name):
-    """ Runs tests on Principle Component Analysis.
+    """ Runs tests on Principal Component Analysis.
     """
     try:
         np.random.seed(0)
@@ -42,8 +42,9 @@ def run_pca(training_data, testing_data, name):
         trainX = scaler.transform(trainX)
         testX = scaler.transform(testX)
 
-        network_shape = list(nn_arch)
-        network_shape.append((training_data.shape[1] / 2,))
+        # network_shape = list(nn_arch)
+        # network_shape.append((training_data.shape[1] / 2,))
+        network_shape = list((training_data.shape[1] / 2,))
 
         # Data for step 1.
         pca = PCA(random_state=random_state)
@@ -55,7 +56,7 @@ def run_pca(training_data, testing_data, name):
         # Data for step 2.
         dims = range(2, trainX.shape[1] + 1)
         grid ={'pca__n_components':dims,'NN__alpha':nn_reg,'NN__hidden_layer_sizes':network_shape}
-        pca = PCA(random_state=random_state)       
+        pca = PCA(random_state=random_state)
         mlp = MLPClassifier(activation='relu',max_iter=2000,early_stopping=True,random_state=random_state)
         pipe = Pipeline([('pca',pca),('NN',mlp)])
         gs = GridSearchCV(pipe,grid,verbose=10,cv=5)

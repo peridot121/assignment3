@@ -11,7 +11,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.cluster import KMeans as kmeans
 from sklearn.mixture import GaussianMixture as GMM
 from collections import defaultdict
-from helpers import cluster_acc, myGMM, pairwiseDistCorr, nn_reg, nn_arch, random_state
+from helpers import cluster_acc, myGMM, pairwiseDistCorr, nn_reg, nn_arch, reconstructionError, random_state
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from sklearn.metrics import adjusted_mutual_info_score as ami
@@ -43,8 +43,9 @@ def run_rp(training_data, testing_data, name):
         trainX = scaler.transform(trainX)
         testX = scaler.transform(testX)
 
-        network_shape = list(nn_arch)
-        network_shape.append((training_data.shape[1] / 2,))
+        # network_shape = list(nn_arch)
+        # network_shape.append((training_data.shape[1] / 2,))
+        network_shape = list((training_data.shape[1] / 2,))
         dims = range(2, trainX.shape[1] + 1)
 
         # Data for step 1.
@@ -54,6 +55,15 @@ def run_rp(training_data, testing_data, name):
             tmp[dim][i] = pairwiseDistCorr(rp.fit_transform(trainX), trainX)
         tmp =pd.DataFrame(tmp).T
         tmp.to_csv(out + 'scree.csv')
+
+        # Reconstruction error.
+        tmp = defaultdict(dict)
+        for i, dim in product(range(10), dims):
+            rp = SparseRandomProjection(random_state=i, n_components=dim)
+            rp.fit(trainX)
+            tmp[dim][i] = reconstructionError(rp, trainX)
+        tmp =pd.DataFrame(tmp).T
+        tmp.to_csv(out + 'scree2.csv')
 
         # Data for step 2.
         grid ={'rp__n_components':dims,'NN__alpha':nn_reg,'NN__hidden_layer_sizes':network_shape}

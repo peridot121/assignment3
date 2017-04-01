@@ -11,9 +11,11 @@ from pca import run_pca
 from ica import run_ica
 from rp import run_rp
 from rf import run_rf
+from benchmark import run_baseline
+from plotting import run_plotting
 
 if __name__ == "__main__":
-    pylab.rcParams['figure.figsize'] = 16, 12
+    pylab.rcParams['figure.figsize'] = 12, 9
 
     root = os.path.curdir
 
@@ -29,7 +31,6 @@ if __name__ == "__main__":
     # transformed_census_test = census_values[32561:,:] # 1/3 of data for cross validation.
     transformed_census_data = census_values[:6513,:] # 2/3 of data for training.
     transformed_census_test = census_values[6513:,:] # 1/3 of data for cross validation.
-
 
     # Run clustering algorithms on unmodified data sets.
     run_clustering(transformed_census_data, transformed_census_test, "census")
@@ -53,5 +54,11 @@ if __name__ == "__main__":
     rf_census_data, _ = run_rf(transformed_census_data, transformed_census_test, "census")
     if (rf_census_data is not None):
         run_clustering(rf_census_data, transformed_census_test, "census_rf")
+
+    # Run a baseline NN for comparison.
+    run_baseline(transformed_census_data, transformed_census_test, "census")
+
+    # Plot graphs.
+    run_plotting("census")
 
     print "Homework 3 automated data execution finished.\n"

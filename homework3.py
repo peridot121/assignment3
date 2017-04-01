@@ -11,9 +11,11 @@ from pca import run_pca
 from ica import run_ica
 from rp import run_rp
 from rf import run_rf
+from benchmark import run_baseline
+from plotting import run_plotting
 
 if __name__ == "__main__":
-    pylab.rcParams['figure.figsize'] = 16, 12
+    pylab.rcParams['figure.figsize'] = 12, 9
 
     root = os.path.curdir
 
@@ -30,46 +32,54 @@ if __name__ == "__main__":
     transformed_census_data = census_values[:6513,:] # 2/3 of data for training.
     transformed_census_test = census_values[6513:,:] # 1/3 of data for cross validation.
 
-
-    red_wine_data_path = os.path.join(root, "data/wine/winequality-red-normalized-randomized-train.csv") # training data for 2015-02-04 to 2015-02-10 filtered to only unique values.
-    red_wine_test_path = os.path.join(root, "data/wine/winequality-red-normalized-randomized-test.csv") # testing data for 2015-02-02 to 2015-02-04 (no overlap to training) also filtered to unique values.
-    red_wine_data = pd.read_csv(red_wine_data_path, index_col=False).values
-    red_wine_test = pd.read_csv(red_wine_test_path, index_col=False).values
+    # Load occupancy data
+    occupancy_data_path = os.path.join(root, "data/occupancy/datatrainingunique.csv") # training data for 2015-02-04 to 2015-02-10 filtered to only unique values.
+    occupancy_test_path = os.path.join(root, "data/occupancy/datatestcombined.csv") # testing data for 2015-02-02 to 2015-02-04 (no overlap to training) also filtered to unique values.
+    occupancy_data = pd.read_csv(occupancy_data_path, index_col=False).values
+    occupancy_test = pd.read_csv(occupancy_test_path, index_col=False).values
 
     # Run clustering algorithms on unmodified data sets.
     run_clustering(transformed_census_data, transformed_census_test, "census")
-    run_clustering(red_wine_data, red_wine_test, "redwine")
+    run_clustering(occupancy_data, occupancy_test, "occupancy")
 
     # Run PCA and clustering on PCA output.
     pca_census_data, _ = run_pca(transformed_census_data, transformed_census_test, "census")
-    pca_redwine_data, _ = run_pca(red_wine_data, red_wine_test, "redwine")
+    pca_occupancy_data, _ = run_pca(occupancy_data, occupancy_test, "occupancy")
     if (pca_census_data is not None):
         run_clustering(pca_census_data, transformed_census_test, "census_pca")
-    if (pca_redwine_data is not None):
-        run_clustering(pca_redwine_data, red_wine_test, "redwine_pca")
+    if (pca_occupancy_data is not None):
+        run_clustering(pca_occupancy_data, occupancy_test, "occupancy_pca")
 
     # Run ICA and clustering on ICA output.
     ica_census_data, _ = run_ica(transformed_census_data, transformed_census_test, "census")
-    ica_redwine_data, _ = run_ica(red_wine_data, red_wine_test, "redwine")
+    ica_occupancy_data, _ = run_ica(occupancy_data, occupancy_test, "occupancy")
     if (ica_census_data is not None):
         run_clustering(ica_census_data, transformed_census_test, "census_ica")
-    if (ica_redwine_data is not None):
-        run_clustering(ica_redwine_data, red_wine_test, "redwine_ica")
+    if (ica_occupancy_data is not None):
+        run_clustering(ica_occupancy_data, occupancy_test, "occupancy_ica")
 
     # Run RP and clustering on RP output.
     rp_census_data, _ = run_rp(transformed_census_data, transformed_census_test, "census")
-    rp_redwine_data, _ = run_rp(red_wine_data, red_wine_test, "redwine")
+    rp_occupancy_data, _ = run_rp(occupancy_data, occupancy_test, "occupancy")
     if (rp_census_data is not None):
         run_clustering(rp_census_data, transformed_census_test, "census_rp")
-    if (rp_redwine_data is not None):
-        run_clustering(rp_redwine_data, red_wine_test, "redwine_rp")
+    if (rp_occupancy_data is not None):
+        run_clustering(rp_occupancy_data, occupancy_test, "occupancy_rp")
 
     # Run RF and clustering on RF output.
     rf_census_data, _ = run_rf(transformed_census_data, transformed_census_test, "census")
-    rf_redwine_data, _ = run_rf(red_wine_data, red_wine_test, "redwine")
+    rf_occupancy_data, _ = run_rf(occupancy_data, occupancy_test, "occupancy")
     if (rf_census_data is not None):
         run_clustering(rf_census_data, transformed_census_test, "census_rf")
-    if (rf_redwine_data is not None):
-        run_clustering(rf_redwine_data, red_wine_test, "redwine_rf")
+    if (rf_occupancy_data is not None):
+        run_clustering(rf_occupancy_data, occupancy_test, "occupancy_rf")
+
+    # Run a baseline NN for comparison.
+    run_baseline(transformed_census_data, transformed_census_test, "census")
+    run_baseline(occupancy_data, occupancy_test, "occupancy")
+
+    # Plot graphs.
+    run_plotting("census")
+    run_plotting("occupancy")
 
     print "Homework 3 automated data execution finished.\n"

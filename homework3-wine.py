@@ -11,9 +11,11 @@ from pca import run_pca
 from ica import run_ica
 from rp import run_rp
 from rf import run_rf
+from benchmark import run_baseline
+from plotting import run_plotting
 
 if __name__ == "__main__":
-    pylab.rcParams['figure.figsize'] = 16, 12
+    pylab.rcParams['figure.figsize'] = 12, 9
 
     root = os.path.curdir
 
@@ -44,5 +46,11 @@ if __name__ == "__main__":
     rf_redwine_data, _ = run_rf(red_wine_data, red_wine_test, "redwine")
     if (rf_redwine_data is not None):
         run_clustering(rf_redwine_data, red_wine_test, "redwine_rf")
+
+    # Run a baseline NN for comparison.
+    run_baseline(red_wine_data, red_wine_test, "redwine")
+
+    # Plot graphs.
+    run_plotting("redwine")
 
     print "Homework 3 automated data execution finished.\n"

@@ -37,8 +37,9 @@ def run_rf(training_data, testing_data, name):
         trainX = scaler.transform(trainX)
         testX = scaler.transform(testX)
 
-        network_shape = list(nn_arch)
-        network_shape.append((training_data.shape[1] / 2,))
+        # network_shape = list(nn_arch)
+        # network_shape.append((training_data.shape[1] / 2,))
+        network_shape = list((training_data.shape[1] / 2,))
 
         # Data for step 1.
         rfc = RandomForestClassifier(n_estimators=100, class_weight='balanced', random_state=random_state, n_jobs=7)
@@ -61,7 +62,9 @@ def run_rf(training_data, testing_data, name):
 
         # Data for step 3.
         # Set this from chart 2 and dump, use clustering script to finish up
-        filtr = ImportanceSelect(rfc)
+        dim = tmp.query('rank_test_score == 1')['param_filter__n'].values[0] # Take the 'n' from the best result.
+        print "Best 'n' = {}".format(dim)
+        filtr = ImportanceSelect(rfc, dim)
 
         trainX2 = filtr.fit_transform(trainX, trainY)
         train2 = pd.DataFrame(np.hstack((trainX2, np.atleast_2d(trainY).T)))

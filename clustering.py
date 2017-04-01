@@ -10,8 +10,7 @@ from sklearn.cluster import KMeans as kmeans
 from sklearn.mixture import GaussianMixture as GMM
 from collections import defaultdict
 from helpers import cluster_acc, myGMM, nn_arch, nn_reg, random_state
-import matplotlib.pyplot as plt
-from matplotlib import cm
+# from sklearn import metrics
 from sklearn.metrics import adjusted_mutual_info_score as ami
 from sklearn.neural_network import MLPClassifier
 from sklearn.model_selection import GridSearchCV
@@ -44,8 +43,9 @@ def run_clustering(training_data, testing_data, name):
         trainX = scaler.transform(trainX)
         # testX = scaler.transform(testX) # This won't work if the training data was transformed by a prior operation such as PCA, ICA, or RP but the test data is unmodified.
 
-        network_shape = list(nn_arch)
-        network_shape.append((training_data.shape[1] / 2,))
+        # network_shape = list(nn_arch)
+        # network_shape.append((training_data.shape[1] / 2,))
+        network_shape = list((training_data.shape[1] / 2,))
 
         SSE = defaultdict(dict)
         ll = defaultdict(dict)
@@ -81,7 +81,7 @@ def run_clustering(training_data, testing_data, name):
         acc.ix[:, :, name].to_csv(out + 'acc.csv')
         adjMI.ix[:, :, name].to_csv(out + 'adjMI.csv')
 
-        # Grid search NN with clusters.
+        # Grid search NN with clusters for K-Means.
         grid ={'km__n_clusters':data_clusters,'NN__alpha':nn_reg,'NN__hidden_layer_sizes':network_shape}
         mlp = MLPClassifier(activation='relu',max_iter=2000,early_stopping=True,random_state=random_state)
         km = kmeans(random_state=random_state)
@@ -91,7 +91,9 @@ def run_clustering(training_data, testing_data, name):
         gs.fit(trainX,trainY)
         tmp = pd.DataFrame(gs.cv_results_)
         tmp.to_csv(out + 'Kmeans.csv')
+        km_clusters = tmp.query('rank_test_score == 1')['param_km__n_clusters'].values[0] # Take the number of clusters from the best result.
 
+        # Grid search NN with clusters for GMM.
         grid ={'gmm__n_components':data_clusters,'NN__alpha':nn_reg,'NN__hidden_layer_sizes':network_shape}
         mlp = MLPClassifier(activation='relu',max_iter=2000,early_stopping=True,random_state=random_state)
         gmm = myGMM(random_state=random_state)
@@ -101,10 +103,21 @@ def run_clustering(training_data, testing_data, name):
         gs.fit(trainX,trainY)
         tmp = pd.DataFrame(gs.cv_results_)
         tmp.to_csv(out + 'GMM.csv')
+        gmm_components = tmp.query('rank_test_score == 1')['param_gmm__n_components'].values[0] # Take the number of components from the best result.
 
-        trainX2D = TSNE(verbose=10,random_state=random_state).fit_transform(trainX)
+        # perplexity = max(5, max(km_clusters, gmm_components)) # This fancy way of setting perplexity turns out to produce bad 2D plots.
+        perplexity = 50 # This arbitrarily high perplexity produces nicer plots contrary to some documentation.
+        trainX2D = TSNE(n_components=2, perplexity=perplexity, verbose=10, random_state=random_state).fit_transform(trainX)
         data2D = pd.DataFrame(np.hstack((trainX2D,np.atleast_2d(trainY).T)),columns=['x','y','target'])
         data2D.to_csv(out + '2D.csv')
+
+        # Cluster to data2D
+        km = kmeans(n_clusters=km_clusters, random_state=random_state)
+        data2D['KmeansCluster'] = km.fit(trainX).predict(trainX)
+        gmm = GMM(n_components=gmm_components, random_state=random_state)
+        data2D['GMMCluster'] = gmm.fit(trainX).predict(trainX)
+        data2D.to_csv(out + '2DCluster.csv')
+
     except Exception:
         print "\nError running clustering for {}.".format(name)
         print(traceback.format_exc())
