@@ -148,5 +148,5 @@ if __name__ == "__main__":
 
     # Generate pretty graphs
     run_plotting("census")
-    run_plotting("occupancy")
+    run_plotting("redwine")
     plt.close('all')
