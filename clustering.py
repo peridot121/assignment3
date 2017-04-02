@@ -17,7 +17,7 @@ from sklearn.model_selection import GridSearchCV
 import sys
 import traceback
 
-def run_clustering(training_data, testing_data, name):
+def run_clustering(training_data, name):
     """ Runs tests on K-Means clustering.
     """
     try:
@@ -29,19 +29,11 @@ def run_clustering(training_data, testing_data, name):
             os.makedirs(output_path)
         out = os.path.join(output_path, name + "_cluster_")
 
-        # if (training_data == None or testing_data == None):
-        #     training_data = pd.read_hdf(os.path.join(output_path, name + 'datasets.hdf'), name)
-        #     testing_data =  pd.read_hdf(os.path.join(output_path, name + 'datasets_test.hdf'), name)
-        testX = testing_data[:, :-1]
-        testY = testing_data[:, testing_data.shape[1] - 1]
         trainX = training_data[:, :-1]
         trainY = training_data[:, training_data.shape[1] - 1]
 
         # Scale to [0, 1]
-        scaler = StandardScaler()
-        scaler.fit(trainX)
-        trainX = scaler.transform(trainX)
-        # testX = scaler.transform(testX) # This won't work if the training data was transformed by a prior operation such as PCA, ICA, or RP but the test data is unmodified.
+        trainX = StandardScaler().fit_transform(trainX)
 
         # network_shape = list(nn_arch)
         # network_shape.append((training_data.shape[1] / 2,))
@@ -54,7 +46,7 @@ def run_clustering(training_data, testing_data, name):
         km = kmeans(random_state=random_state)
         gmm = GMM(random_state=random_state)
 
-        data_clusters = range(2, testing_data.shape[1] + 1)
+        data_clusters = range(2, training_data.shape[1] + 1)
         st = clock()
         for k in data_clusters:
             # set clusters to iterative value of k (2-n) for both kmeans and em

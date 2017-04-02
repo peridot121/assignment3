@@ -14,7 +14,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.random_projection import SparseRandomProjection
 
 
-def run_rf(training_data, testing_data, name):
+def run_rf(training_data, name):
     """ Runs tests on Random Forest.
     """
     try:
@@ -26,16 +26,11 @@ def run_rf(training_data, testing_data, name):
             os.makedirs(output_path)
         out = os.path.join(output_path, name + "_rf_")
 
-        testX = testing_data[:, :-1]
-        testY = testing_data[:, testing_data.shape[1] - 1]
         trainX = training_data[:, :-1]
         trainY = training_data[:, training_data.shape[1] - 1]
 
         # Scale to [0, 1]
-        scaler = StandardScaler()
-        scaler.fit(trainX)
-        trainX = scaler.transform(trainX)
-        testX = scaler.transform(testX)
+        trainX = StandardScaler().fit_transform(trainX)
 
         # network_shape = list(nn_arch)
         # network_shape.append((training_data.shape[1] / 2,))
@@ -71,10 +66,8 @@ def run_rf(training_data, testing_data, name):
         cols = list(range(train2.shape[1]))
         cols[-1] = 'Result'
         train2.columns = cols
-        # train2.to_hdf(out + 'datasets.hdf', name, complib='blosc', complevel=9)
 
-        # TODO: Something with/for the test data.
-        return train2.values, testing_data
+        return train2.values
     except Exception:
         print "\nError running RF for {}.".format(name)
         print(traceback.format_exc())

@@ -19,36 +19,34 @@ if __name__ == "__main__":
 
     root = os.path.curdir
 
-    red_wine_data_path = os.path.join(root, "data/wine/winequality-red-binary-train.csv")
-    red_wine_test_path = os.path.join(root, "data/wine/winequality-red-binary-test.csv")
+    red_wine_data_path = os.path.join(root, "data/wine/winequality-red-binary.csv")
     red_wine_data = pd.read_csv(red_wine_data_path, index_col=False).values
-    red_wine_test = pd.read_csv(red_wine_test_path, index_col=False).values
 
     # Run clustering algorithms on unmodified data sets.
-    run_clustering(red_wine_data, red_wine_test, "redwine")
+    run_clustering(red_wine_data, "redwine")
 
     # Run PCA and clustering on PCA output.
-    pca_redwine_data, _ = run_pca(red_wine_data, red_wine_test, "redwine")
+    pca_redwine_data = run_pca(red_wine_data, "redwine")
     if (pca_redwine_data is not None):
-        run_clustering(pca_redwine_data, red_wine_test, "redwine_pca")
+        run_clustering(pca_redwine_data, "redwine_pca")
 
     # Run ICA and clustering on ICA output.
-    ica_redwine_data, _ = run_ica(red_wine_data, red_wine_test, "redwine")
+    ica_redwine_data = run_ica(red_wine_data, "redwine")
     if (ica_redwine_data is not None):
-        run_clustering(ica_redwine_data, red_wine_test, "redwine_ica")
+        run_clustering(ica_redwine_data, "redwine_ica")
 
     # Run RP and clustering on RP output.
-    rp_redwine_data, _ = run_rp(red_wine_data, red_wine_test, "redwine")
+    rp_redwine_data = run_rp(red_wine_data, "redwine")
     if (rp_redwine_data is not None):
-        run_clustering(rp_redwine_data, red_wine_test, "redwine_rp")
+        run_clustering(rp_redwine_data, "redwine_rp")
 
     # Run RF and clustering on RF output.
-    rf_redwine_data, _ = run_rf(red_wine_data, red_wine_test, "redwine")
+    rf_redwine_data = run_rf(red_wine_data, "redwine")
     if (rf_redwine_data is not None):
-        run_clustering(rf_redwine_data, red_wine_test, "redwine_rf")
+        run_clustering(rf_redwine_data, "redwine_rf")
 
     # Run a baseline NN for comparison.
-    run_baseline(red_wine_data, red_wine_test, "redwine")
+    run_baseline(red_wine_data, "redwine")
 
     # Plot graphs.
     run_plotting("redwine")
