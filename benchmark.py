@@ -2,6 +2,11 @@
 import os
 import sys
 import traceback
+
+
+
+
+
 import pandas as pd
 import numpy as np
 
@@ -15,7 +20,7 @@ def run_baseline(training_data, testing_data, name):
     """ Runs a baseline Neural Net on the data.
     """
     try:
-        np.random.seed(0)
+        np.random.seed(42)
 
         root = os.path.curdir
         output_path = os.path.join(root, "output")

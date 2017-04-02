@@ -19,8 +19,8 @@ if __name__ == "__main__":
 
     root = os.path.curdir
 
-    red_wine_data_path = os.path.join(root, "data/wine/winequality-red-normalized-randomized-binary-train.csv") # training data for 2015-02-04 to 2015-02-10 filtered to only unique values.
-    red_wine_test_path = os.path.join(root, "data/wine/winequality-red-normalized-randomized-binary-test.csv") # testing data for 2015-02-02 to 2015-02-04 (no overlap to training) also filtered to unique values.
+    red_wine_data_path = os.path.join(root, "data/wine/winequality-red-binary-train.csv")
+    red_wine_test_path = os.path.join(root, "data/wine/winequality-red-binary-test.csv")
     red_wine_data = pd.read_csv(red_wine_data_path, index_col=False).values
     red_wine_test = pd.read_csv(red_wine_test_path, index_col=False).values
 

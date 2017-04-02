@@ -15,7 +15,7 @@ from sklearn.base import TransformerMixin,BaseEstimator
 import scipy.sparse as sps
 from scipy.linalg import pinv
 
-random_state = 12345
+random_state = 54321
 nn_arch = [(5,2),(5,),(2,),(10,5), (10,)]
 nn_reg = [10**-x for x in range(1,5)]
 

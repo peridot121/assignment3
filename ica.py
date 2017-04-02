@@ -24,7 +24,7 @@ def run_ica(training_data, testing_data, name):
     """ Runs tests on Independent Component Analysis.
     """
     try:
-        np.random.seed(0)
+        np.random.seed(42)
 
         root = os.path.curdir
         output_path = os.path.join(root, "output")
@@ -66,7 +66,7 @@ def run_ica(training_data, testing_data, name):
         ica = FastICA(random_state=random_state)
         mlp = MLPClassifier(activation='relu', max_iter=2000, early_stopping=True, random_state=random_state)
         pipe = Pipeline([('ica', ica), ('NN', mlp)])
-        gs = GridSearchCV(pipe, grid, verbose=10, cv=5)
+        gs = GridSearchCV(pipe, grid, verbose=10, cv=5,n_jobs=-1,solver='lbfgs')
 
         gs.fit(trainX, trainY)
         tmp = pd.DataFrame(gs.cv_results_)

@@ -21,7 +21,7 @@ def run_clustering(training_data, testing_data, name):
     """ Runs tests on K-Means clustering.
     """
     try:
-        np.random.seed(0)
+        np.random.seed(42)
 
         root = os.path.curdir
         output_path = os.path.join(root, "output")
@@ -57,16 +57,25 @@ def run_clustering(training_data, testing_data, name):
         data_clusters = range(2, testing_data.shape[1] + 1)
         st = clock()
         for k in data_clusters:
+            # set clusters to iterative value of k (2-n) for both kmeans and em
             km.set_params(n_clusters=k)
             gmm.set_params(n_components=k)
+            # run the algos
             km.fit(trainX)
             gmm.fit(trainX)
+            # Store the score
             SSE[k][name] = km.score(trainX)
             ll[k][name] = gmm.score(trainX)
+
+            # accuracy of kmeans/em versus original classifications
             acc[k][name]['Kmeans'] = cluster_acc(trainY, km.predict(trainX))
             acc[k][name]['GMM'] = cluster_acc(trainY, gmm.predict(trainX))
+
+            # Find adjusted mutual information of kmeans/gmm
             adjMI[k][name]['Kmeans'] = ami(trainY, km.predict(trainX))
             adjMI[k][name]['GMM'] = ami(trainY, gmm.predict(trainX))
+
+            # clock time
             print(k, clock() - st)
 
         SSE = (-pd.DataFrame(SSE)).T
@@ -86,24 +95,26 @@ def run_clustering(training_data, testing_data, name):
         mlp = MLPClassifier(activation='relu',max_iter=2000,early_stopping=True,random_state=random_state)
         km = kmeans(random_state=random_state)
         pipe = Pipeline([('km',km),('NN',mlp)])
-        gs = GridSearchCV(pipe,grid,verbose=10)
+        gs = GridSearchCV(pipe,grid,verbose=10,n_jobs=-1,solver='lbfgs')
 
         gs.fit(trainX,trainY)
         tmp = pd.DataFrame(gs.cv_results_)
         tmp.to_csv(out + 'Kmeans.csv')
         km_clusters = tmp.query('rank_test_score == 1')['param_km__n_clusters'].values[0] # Take the number of clusters from the best result.
+        print("Best cluster for km is %s"%km_clusters)
 
         # Grid search NN with clusters for GMM.
         grid ={'gmm__n_components':data_clusters,'NN__alpha':nn_reg,'NN__hidden_layer_sizes':network_shape}
         mlp = MLPClassifier(activation='relu',max_iter=2000,early_stopping=True,random_state=random_state)
         gmm = myGMM(random_state=random_state)
         pipe = Pipeline([('gmm',gmm),('NN',mlp)])
-        gs = GridSearchCV(pipe,grid,verbose=10,cv=5)
+        gs = GridSearchCV(pipe,grid,verbose=10,cv=5,n_jobs=-1,solver='lbfgs')
 
         gs.fit(trainX,trainY)
         tmp = pd.DataFrame(gs.cv_results_)
         tmp.to_csv(out + 'GMM.csv')
         gmm_components = tmp.query('rank_test_score == 1')['param_gmm__n_components'].values[0] # Take the number of components from the best result.
+        print("Best cluster for em is %s"%gmm_components)
 
         # perplexity = max(5, max(km_clusters, gmm_components)) # This fancy way of setting perplexity turns out to produce bad 2D plots.
         perplexity = 50 # This arbitrarily high perplexity produces nicer plots contrary to some documentation.
