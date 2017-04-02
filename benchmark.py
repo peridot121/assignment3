@@ -45,7 +45,7 @@ def run_baseline(training_data, testing_data, name):
 
         # Benchmarking for chart type 2
         grid ={'NN__alpha':nn_reg,'NN__hidden_layer_sizes':network_shape}
-        mlp = MLPClassifier(activation='relu',max_iter=2000,early_stopping=True,random_state=random_state)
+        mlp = MLPClassifier(activation='relu',max_iter=3000,early_stopping=True,random_state=random_state)
         pipe = Pipeline([('NN',mlp)])
         gs = GridSearchCV(pipe,grid,verbose=10,cv=5)
 

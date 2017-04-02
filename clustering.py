@@ -92,7 +92,7 @@ def run_clustering(training_data, testing_data, name):
 
         # Grid search NN with clusters for K-Means.
         grid ={'km__n_clusters':data_clusters,'NN__alpha':nn_reg,'NN__hidden_layer_sizes':network_shape}
-        mlp = MLPClassifier(activation='relu',max_iter=2000,early_stopping=True,random_state=random_state)
+        mlp = MLPClassifier(activation='relu',max_iter=3000,early_stopping=True,random_state=random_state)
         km = kmeans(random_state=random_state)
         pipe = Pipeline([('km',km),('NN',mlp)])
         gs = GridSearchCV(pipe,grid,verbose=10,n_jobs=-1,solver='lbfgs')
@@ -105,7 +105,7 @@ def run_clustering(training_data, testing_data, name):
 
         # Grid search NN with clusters for GMM.
         grid ={'gmm__n_components':data_clusters,'NN__alpha':nn_reg,'NN__hidden_layer_sizes':network_shape}
-        mlp = MLPClassifier(activation='relu',max_iter=2000,early_stopping=True,random_state=random_state)
+        mlp = MLPClassifier(activation='relu',max_iter=3000,early_stopping=True,random_state=random_state)
         gmm = myGMM(random_state=random_state)
         pipe = Pipeline([('gmm',gmm),('NN',mlp)])
         gs = GridSearchCV(pipe,grid,verbose=10,cv=5,n_jobs=-1,solver='lbfgs')

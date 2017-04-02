@@ -64,7 +64,7 @@ def run_ica(training_data, testing_data, name):
         # Data for step 2.
         grid = {'ica__n_components': dims, 'NN__alpha': nn_reg, 'NN__hidden_layer_sizes': network_shape}
         ica = FastICA(random_state=random_state)
-        mlp = MLPClassifier(activation='relu', max_iter=2000, early_stopping=True, random_state=random_state)
+        mlp = MLPClassifier(activation='relu', max_iter=3000, early_stopping=True, random_state=random_state)
         pipe = Pipeline([('ica', ica), ('NN', mlp)])
         gs = GridSearchCV(pipe, grid, verbose=10, cv=5,n_jobs=-1,solver='lbfgs')
 
