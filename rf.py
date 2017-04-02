@@ -47,9 +47,9 @@ def run_rf(training_data, name):
         filtr = ImportanceSelect(rfc)
         dims = range(2, trainX.shape[1] + 1)
         grid = {'filter__n': dims, 'NN__alpha': nn_reg, 'NN__hidden_layer_sizes': network_shape}
-        mlp = MLPClassifier(activation='relu', max_iter=3000, early_stopping=True, random_state=random_state)
+        mlp = MLPClassifier(activation='relu', max_iter=3000, early_stopping=True, random_state=random_state,solver='lbfgs')
         pipe = Pipeline([('filter', filtr), ('NN', mlp)])
-        gs = GridSearchCV(pipe, grid, verbose=10, cv=5,n_jobs=-1,solver='lbfgs')
+        gs = GridSearchCV(pipe, grid, verbose=10, cv=5,n_jobs=-1)
 
         gs.fit(trainX, trainY)
         tmp = pd.DataFrame(gs.cv_results_)
